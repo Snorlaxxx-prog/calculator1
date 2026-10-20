@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #141e30, #243b55);
+        }
+
+        .calculator {
+            width: 360px;
+            max-width: 100%;
+            padding: 22px;
+            background: #1e293b;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px #0005;
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+            color: white;
+        }
+
+        .display {
+            width: 100%;
+            min-height: 85px;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            background: #0f172a;
+            color: #38bdf8;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .expression {
+            min-height: 18px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .answer {
+            margin-top: 8px;
+            font-size: 27px;
+        }
+
+        .error {
+            color: #f87171;
+            font-size: 14px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            color: #cbd5e1;
+            margin: 10px 0 6px;
+            font-size: 13px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            background: #334155;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #38bdf8;
+        }
+
+        /* Remove number input up/down buttons */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 9px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 13px 5px;
+            border: none;
+            border-radius: 9px;
+            background: #334155;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #475569;
+        }
+
+        .scientific {
+            background: #0e7490;
+        }
+
+        .scientific:hover {
+            background: #0891b2;
+        }
+
+        .operator {
+            background: #7c3aed;
+        }
+
+        .operator:hover {
+            background: #6d28d9;
+        }
+
+        .equals {
+            background: #16a34a;
+        }
+
+        .equals:hover {
+            background: #15803d;
+        }
+
+        .clear {
+            background: #dc2626;
+        }
+
+        .clear:hover {
+            background: #b91c1c;
+        }
+
+        .wide {
+            grid-column: span 2;
+        }
+
+        .note {
+            color: #94a3b8;
+            font-size: 11px;
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="calculator">
+        <h2>Scientific Calculator</h2>
+
+        <div class="display">
+            <div class="expression" id="expressionDisplay">
+                {{ expression }}
+            </div>
+
+            <div class="answer" id="answerDisplay">
+                {% if error %}
+                Error
+                {% elif result is not none %}
+                {{ result }}
+                {% else %}
+                0
+                {% endif %}
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="/" id="calculatorForm">
+            <label for="numOne">First Number / Angle</label>
+            <input type="number" step="any" id="numOne" name="numOne" value="{{ numOne }}" placeholder="Enter number"
+                required>
+
+            <label for="numTwo">Second Number</label>
+            <input type="number" step="any" id="numTwo" name="numTwo" value="{{ numTwo }}"
+                placeholder="Only for two-number operations">
+
+            <label for="angleMode">Angle Mode</label>
+            <select name="angleMode" id="angleMode">
+                <option value="DEG" {% if angleMode=="DEG" %}selected{% endif %}>
+                    Degrees
+                </option>
+                <option value="RAD" {% if angleMode=="RAD" %}selected{% endif %}>
+                    Radians
+                </option>
+            </select>
+
+            <input type="hidden" name="operation" id="operation" value="{{ operation }}">
+
+            <div class="buttons">
+                <button type="button" class="scientific" onclick="chooseOperation('sin')">sin</button>
+                <button type="button" class="scientific" onclick="chooseOperation('cos')">cos</button>
+                <button type="button" class="scientific" onclick="chooseOperation('tan')">tan</button>
+                <button type="button" class="scientific" onclick="chooseOperation('sqrt')">√</button>
+
+                <button type="button" class="scientific" onclick="chooseOperation('square')">x²</button>
+                <button type="button" class="scientific" onclick="chooseOperation('power')">xʸ</button>
+                <button type="button" class="scientific" onclick="chooseOperation('log')">log</button>
+                <button type="button" class="scientific" onclick="chooseOperation('ln')">ln</button>
+
+                <button type="button" class="operator" onclick="chooseOperation('add')">+</button>
+                <button type="button" class="operator" onclick="chooseOperation('minus')">−</button>
+                <button type="button" class="operator" onclick="chooseOperation('times')">×</button>
+                <button type="button" class="operator" onclick="chooseOperation('divide')">÷</button>
+
+                <button type="button" class="clear wide" onclick="clearCalculator()">Clear</button>
+                <button type="submit" class="equals wide">Calculate =</button>
+            </div>
+        </form>
+
+    </div>
+
+    <script>
+        function chooseOperation(operation) {
+            document.getElementById("operation").value = operation;
+            document.getElementById("calculatorForm").requestSubmit();
+        }
+
+        function clearCalculator() {
+            document.getElementById("numOne").value = "";
+            document.getElementById("numTwo").value = "";
+            document.getElementById("operation").value = "add";
+            document.getElementById("expressionDisplay").textContent = "";
+            document.getElementById("answerDisplay").textContent = "0";
+        }
+    </script>
+</body>
+
+</html>
